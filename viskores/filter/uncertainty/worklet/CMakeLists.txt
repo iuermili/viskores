@@ -13,4 +13,4 @@ set(uncertainty_headers
     FiberUncertainUniform.h
   )
 #-----------------------------------------------------------------------------#i
-vtkm_declare_headers(${uncertainty_headers})
+viskores_declare_headers(${uncertainty_headers})
