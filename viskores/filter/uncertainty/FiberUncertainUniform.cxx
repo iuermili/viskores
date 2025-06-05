@@ -30,7 +30,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
 {
   std::string FieldName;
 
-
+  
   viskores::cont::Field EnsembleMinX = this->GetFieldFromDataSet(0, input);
   viskores::cont::Field EnsembleMaxX = this->GetFieldFromDataSet(1, input);
   viskores::cont::Field EnsembleMinY = this->GetFieldFromDataSet(2, input);

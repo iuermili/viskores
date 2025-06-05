@@ -59,13 +59,12 @@ viskores::cont::DataSet MakeFiberUncertainUniformDataSet()
 
 void TestFiberUncertainUniform()
 {
-  viskores::cont::DataSet ds = MakeFiberUncertainUniformDataSet<vtkm::FloatDefault>();
+  viskores::cont::DataSet ds = MakeFiberUncertainUniformDataSet<viskores::FloatDefault>();
 
   viskores::Pair<viskores::FloatDefault, viskores::FloatDefault> minAxis(15.0, 15.0);
   viskores::Pair<viskores::FloatDefault, viskores::FloatDefault> maxAxis(25.0, 25.0);
 
-
-  const vtkm::FloatDefault delta = 0.05f;
+  const viskores::FloatDefault delta = 0.05f;
 
   viskores::filter::uncertainty::FiberUncertainUniform closedFormFilter;
   closedFormFilter.SetMinAxis(minAxis);
@@ -101,9 +100,9 @@ void TestFiberUncertainUniform()
   viskores::cont::ArrayHandle<viskores::FloatDefault> monteArray;
   unknownMC.AsArrayHandle(monteArray);
   auto montePortal = monteArray.ReadPortal();
-  vtkm::Id numValues = closedArray.GetNumberOfValues();
+  viskores::Id numValues = closedArray.GetNumberOfValues();
   std::cout << "Comparing outputs for " << numValues << " values." << std::endl;
-  for (vtkm::Id i = 0; i < numValues; ++i)
+  for (viskores::Id i = 0; i < numValues; ++i)
   {
     viskores::FloatDefault diff = std::fabs(closedPortal.Get(i) - montePortal.Get(i));
     VISKORES_TEST_ASSERT(diff <= delta, "Difference between ClosedForm and MonteCarlo value too large.");
