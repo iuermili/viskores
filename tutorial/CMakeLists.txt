@@ -53,6 +53,9 @@ endif()
 add_executable(io io.cxx)
 target_link_libraries(io viskores::io)
 
+add_executable(vf_divergence vf_divergence.cxx)
+target_link_libraries(vf_divergence viskores::io)
+
 add_executable(contour contour.cxx)
 target_link_libraries(contour viskores::filter_core viskores::filter_contour viskores::io)
 
