@@ -21,6 +21,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <viskores/filter/uncertainty/worklet/FiberUncertainUniform.h>
 #include <viskores/worklet/WorkletMapField.h>
 
 #if defined(VISKORES_CUDA) || defined(VISKORES_KOKKOS_HIP)
