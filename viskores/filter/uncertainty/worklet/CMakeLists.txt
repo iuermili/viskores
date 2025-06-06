@@ -19,11 +19,6 @@
 set(headers
 # Bivariate data
     FiberUncertainUniform.h
-
-    install(FILES
-      FiberUncertainUniform.h
-      DESTINATION include/viskores-1.0/viskores/filter/uncertainty/worklet
-    )
   )
 #-----------------------------------------------------------------------------
 viskores_declare_headers(${headers})
