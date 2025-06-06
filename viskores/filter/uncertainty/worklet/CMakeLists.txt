@@ -8,9 +8,9 @@
 ##  PURPOSE.  See the above copyright notice for more information.
 ##============================================================================
 
-set(uncertainty_headers
+set(headers
 # Bivariate data
     FiberUncertainUniform.h
   )
 #-----------------------------------------------------------------------------#i
-viskores_declare_headers(${uncertainty_headers})
+viskores_declare_headers(${headers})
