@@ -20,6 +20,7 @@ set(uncertainty_headers
   ContourUncertainUniform.h
   ContourUncertainUniformMonteCarlo.h
   FiberUncertainUniform.h
+  worklet/FiberUncertainUniform.h
   )
 
 set(uncertainty_sources_device
@@ -28,11 +29,7 @@ set(uncertainty_sources_device
   FiberUncertainUniform.cxx
   )
 
-set(worklet_headers
-  worklet/FiberUncertainUniform.h
-  )
-
-viskores_install_headers(filter/uncertainty/worklet ${worklet_headers})
+viskores_declare_headers(${uncertainty_headers})
 
 viskores_library(
   NAME viskores_filter_uncertainty
