@@ -39,7 +39,7 @@ viskores::cont::DataSet MakeFiberUncertainUniformDataSet()
   std::vector<T> ensembleMaxY;
 
   viskores::IdComponent k = 0;
-  viskores::cont::ArrayHandleRandomUniformReal<viskores::FloatDefault> randomArray(20 * 20 * 20 * 2,
+  viskores::cont::ArrayHandleRandomUniformReal<viskores::FloatDefault> randomArray(numPoints * 4,
                                                                            { 0xceed });
   auto portal = randomArray.ReadPortal();
 
