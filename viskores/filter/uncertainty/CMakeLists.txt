@@ -16,6 +16,8 @@
 ##  PURPOSE.  See the above copyright notice for more information.
 ##============================================================================
 
+viskores_get_kit_name(kit_name kit_dir)
+
 set(uncertainty_headers
   ContourUncertainUniform.h
   ContourUncertainUniformMonteCarlo.h
