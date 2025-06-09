@@ -21,4 +21,4 @@ set(headers
     FiberUncertainUniform.h
   )
 #-----------------------------------------------------------------------------
-viskores_declare_headers(${headers})
+viskores_install_headers(${headers})
