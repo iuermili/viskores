@@ -19,10 +19,12 @@
 set(uncertainty_headers
   ContourUncertainUniform.h
   ContourUncertainUniformMonteCarlo.h
+  VFDivergenceUncertainUniform.h
   )
 set(uncertainty_sources_device
   ContourUncertainUniform.cxx
   ContourUncertainUniformMonteCarlo.cxx
+  VFDivergenceUncertainUniform.cxx
   )
 
 viskores_library(
