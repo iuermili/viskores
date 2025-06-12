@@ -33,3 +33,9 @@ viskores_library(
   DEVICE_SOURCES ${uncertainty_sources_device}
   USE_VISKORES_JOB_POOL
 )
+
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/worklet
+  DESTINATION ${Viskores_INSTALL_INCLUDE_DIR}/viskores/filter/uncertainty
+  FILES_MATCHING PATTERN "*.h"
+)
