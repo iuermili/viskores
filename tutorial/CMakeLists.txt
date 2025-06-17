@@ -56,6 +56,9 @@ target_link_libraries(io viskores::io)
 add_executable(vf_magnitude vf_magnitude.cxx)
 target_link_libraries(vf_magnitude viskores::filter_core viskores::filter_vector_analysis viskores::io)
 
+add_executable(vf_divergence vf_divergence.cxx)
+target_link_libraries(vf_divergence viskores::filter_core viskores::filter_vector_analysis viskores::io)
+
 add_executable(contour contour.cxx)
 target_link_libraries(contour viskores::filter_core viskores::filter_contour viskores::io)
 
