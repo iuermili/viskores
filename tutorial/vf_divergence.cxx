@@ -15,12 +15,15 @@
 //  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
 //  PURPOSE.  See the above copyright notice for more information.
 //============================================================================
-#include <iostream>
-#include <viskores/cont/Initialize.h>
-#include <viskores/cont/DataSet.h>
+#include <viskores/Math.h>
+#include <viskores/Types.h>
 #include <viskores/cont/ArrayHandle.h>
+#include <viskores/cont/DataSet.h>
+#include <viskores/cont/Field.h>
+#include <viskores/cont/Initialize.h>
 #include <viskores/cont/Invoker.h>
 #include <viskores/worklet/WorkletPointNeighborhood.h>
+#include <viskores/worklet/WorkletMapTopology.h>
 #include <viskores/io/VTKDataSetReader.h>
 #include <viskores/io/VTKDataSetWriter.h>
 
@@ -49,86 +52,85 @@ struct ComputeDivergence : public viskores::worklet::WorkletPointNeighborhood
         OutType div_u_mean, var_squared_u;
         OutType div_v_mean, var_squared_v;
 
+        if (boundary.MinNeighborIndices(1)[1] == 0)
+        {
+            div_u_mean = uMean.Get(0, 1, 0) - uMean.Get(0, 0, 0);
+            var_squared_u = uVar.Get(0, 1, 0) + uVar.Get(0, 0, 0);
+        }
+        else if (boundary.MaxNeighborIndices(1)[1] == 0) {
+            div_u_mean = uMean.Get(0, 0, 0) - uMean.Get(0, -1, 0);
+            var_squared_u = uVar.Get(0, 0, 0) + uVar.Get(0, -1, 0);
+        }
+        else {
+            div_u_mean = (uMean.Get(0, 1, 0) - uMean.Get(0, -1, 0)) / 2.0;
+            var_squared_u = uVar.Get(0, 1, 0) + uVar.Get(0, -1, 0);
+        }
+
         if (boundary.MinNeighborIndices(1)[0] == 0)
         {
-            div_u_mean = uMean.Get(1, 0, 0) - uMean.Get(0, 0, 0);
-            var_squared_u = uVar.Get(1, 0, 0) + uVar.Get(0, 0, 0);
+            div_v_mean = vMean.Get(1, 0, 0) - vMean.Get(0, 0, 0);
+            var_squared_v = vVar.Get(1, 0, 0) + vVar.Get(0, 0, 0);
         }
         else if (boundary.MaxNeighborIndices(1)[0] == 0)
         {
-            div_u_mean = uMean.Get(0, 0, 0) - uMean.Get(-1, 0, 0);
-            var_squared_u = uVar.Get(0, 0, 0) + uVar.Get(-1, 0, 0);
+            div_v_mean = vMean.Get(0, 0, 0) - vMean.Get(-1, 0, 0);
+            var_squared_v = vVar.Get(0, 0, 0) + vVar.Get(-1, 0, 0);
         }
         else
         {
-            div_u_mean = (uMean.Get(1, 0, 0) - uMean.Get(-1, 0, 0)) / 2.0f;
-            var_squared_u = (uVar.Get(1, 0, 0) + uVar.Get(-1, 0, 0)) / 4.0f;
-        }
-        
-        if (boundary.MinNeighborIndices(1)[1] == 0)
-        {
-            div_v_mean = vMean.Get(0, 1, 0) - vMean.Get(0, 0, 0);
-            var_squared_v = vVar.Get(0, 1, 0) + vVar.Get(0, 0, 0);
-        }
-        else if (boundary.MaxNeighborIndices(1)[1] == 0) {
-            div_v_mean = vMean.Get(0, 0, 0) - vMean.Get(0, -1, 0);
-            var_squared_v = vVar.Get(0, 0, 0) + vVar.Get(0, -1, 0);
-        }
-        else {
-            div_v_mean = (vMean.Get(0, 1, 0) - vMean.Get(0, -1, 0)) / 2.0f;
-            var_squared_v = (vVar.Get(0, 1, 0) + vVar.Get(0, -1, 0)) / 4.0f;;
+            div_v_mean = (vMean.Get(1, 0, 0) - vMean.Get(-1, 0, 0)) / 2.0;
+            var_squared_v = vVar.Get(1, 0, 0) + vVar.Get(-1, 0, 0);
         }
 
         divergenceMean = div_u_mean + div_v_mean;
-        divergenceVariance = viskores::Sqrt(var_squared_u + var_squared_v);
+        OutType total_variance = var_squared_u + var_squared_v;
+        divergenceVariance = viskores::Sqrt(viskores::Max(total_variance, static_cast<OutType>(0.0)));
     }
 };
 
-// Worklet: computes the crossing probability of the divergence field at a given isovalue given the mean and variance of the divergence at each point in the cell.
-/* struct CrossingProbability : viskores::worklet::WorkletVisitCellsWithPoints
+// Helper Function: computes Gaussian CDF for a given value x, mean mu, and standard deviation sigma.
+template <typename T>
+VISKORES_EXEC T GaussianCDF(T x, T mu, T sigma)
 {
-    using ControlSignature = void(CellSetIn,
+    return static_cast<T>(0.5) * (static_cast<T>(1.0) + erf((x - mu) / (sigma * viskores::Sqrt(2.0))));
+}
+
+// Worklet: computes the crossing probability a 2D vector field at each point based on the mean and variance of the divergence.
+struct CrossingProbability : public viskores::worklet::WorkletVisitCellsWithPoints
+{
+    using ControlSignature = void(CellSetIn domain,
                                     FieldInPoint div_mean,
                                     FieldInPoint div_variance,
                                     FieldOutCell crossing_prob);
-    using ExecutionSignature = void(_2, _3, _4);
+    using ExecutionSignature = _4(_2, _3);
     using InputDomain = _1;
 
-    VISKORES_CONT
-    CrossingProbability(viskores::FloatDefault isovalue) : Isovalue(isovalue) {}
+    viskores::Float64 Isovalue;
 
-    template <typename DivMeanVec, typename DivVarianceVec>
-    VISKORES_EXEC void operator()(const DivMeanVec& div_means,
-                                  const DivVarianceVec& div_variances,
-                                  viskores::FloatDefault& crossing_prob) const
+    template <typename MeanVecType, typename VarianceVecType>
+    VISKORES_EXEC viskores::Float64 operator()(const MeanVecType& divMeanAtCorners,
+                                    const VarianceVecType& divVarianceAtCorners) const
     {
-        // 4 corners of the square
-        constexpr viskores::IdComponent num_corners = 4;
+        viskores::Float64 prob_pos = 1.0;
+        viskores::Float64 prob_neg = 1.0;
 
-        viskores::Vec<viskores::FloatDefault, num_corners> p_pos;
-        viskores::Vec<viskores::FloatDefault, num_corners> p_neg;
+        for (viskores::IdComponent i = 0; i < divMeanAtCorners.GetNumberOfComponents(); ++i)
+        {
+            auto mean = static_cast<viskores::Float64>(divMeanAtCorners[i]);
+            auto variance = static_cast<viskores::Float64>(divVarianceAtCorners[i]);
+            
+            auto cdf_value = viskores::Sqrt(viskores::Max(variance, static_cast<viskores::Float64>(0.0)));
 
-        // part of CDF formula
-        const viskores::FloatDefault inv_sqrt_2 = viskores::RSqrt(2.0f);
+            auto prob_below = GaussianCDF(this->Isovalue, mean, cdf_value);
+            auto prob_above = 1.0 - prob_below;
 
-        for (viskores::IdComponent i = 0; i < num_corners; ++i) {
-            viskores::FloatDefault mu = divMeans[i];
-            viskores::FloatDefault sigma = divVariances[i];
-            viskores::FloatDefault p = 0.5 * (1.0 + viskores::Erf((this->Isovalue - mu) * inv_sqrt_2 / sigma));
-            p_pos[i] = p;
-            p_neg[i] = 1.0 - p;
+            prob_neg *= prob_below;
+            prob_pos *= prob_above;
         }
 
-        viskores::FloatDefault product_p_pos = 1.0f;
-        viskores::FloatDefault product_p_neg = 1.0f;
-        for (viskores::IdComponent i = 0; i < num_corners; ++i) {
-            product_p_pos *= p_pos[i];
-            product_p_neg *= p_neg[i];
-        }
-
-        crossing_prob = 1.0f - product_p_pos - product_p_neg;
+        return 1.0f - prob_pos - prob_neg;
     }
-}; */
+};
 
 // Main Function: initializes Viskores, reads a .vtk dataset, computes divergence statistics and displays crossing probabilities.
 int main(int argc, char* argv[])
@@ -143,8 +145,8 @@ int main(int argc, char* argv[])
     using ArrayType = viskores::cont::ArrayHandle<viskores::FloatDefault>;
     ArrayType meanX_handle, varX_handle, meanY_handle, varY_handle;
     ds.GetField("meanX").GetData().AsArrayHandle(meanX_handle);
-    ds.GetField("varX").GetData().AsArrayHandle(meanY_handle);
-    ds.GetField("meanY").GetData().AsArrayHandle(varX_handle);
+    ds.GetField("varX").GetData().AsArrayHandle(varX_handle);
+    ds.GetField("meanY").GetData().AsArrayHandle(meanY_handle);
     ds.GetField("varY").GetData().AsArrayHandle(varY_handle);
     ArrayType div_mean_handle, div_variance_handle;
 
@@ -157,8 +159,20 @@ int main(int argc, char* argv[])
             div_mean_handle,
             div_variance_handle
     );
+
+    CrossingProbability crossingprobWorklet;
+    crossingprobWorklet.Isovalue = -5.05;
+    viskores::cont::ArrayHandle<viskores::Float64> crossing_prob_handle;
+    invoker(crossingprobWorklet,
+                ds.GetCellSet(),
+                div_mean_handle,
+                div_variance_handle,
+                crossing_prob_handle
+    );
+
     ds.AddPointField("divergence_mean", div_mean_handle);
     ds.AddPointField("divergence_variance", div_variance_handle);
+    ds.AddCellField("crossing_probability", crossing_prob_handle);
 
     viskores::io::VTKDataSetWriter writer("out_vf_divergence.vtk");
     writer.WriteDataSet(ds);
