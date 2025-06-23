@@ -18,7 +18,7 @@
 
 #add the directory that contains the Viskores config file to the cmake
 #path so that our tutorial can find Viskores
-#Normally when running CMake, you need to set the Viskores_DIR to
+#normally when running CMake, you need to set the Viskores_DIR to
 #find the ViskoresConfig.cmake file. Because we already know where this
 #file is, we can add the location to look to CMAKE_PREFIX_PATH.
 set(CMAKE_PREFIX_PATH ${Viskores_BINARY_DIR}/${Viskores_INSTALL_CONFIG_DIR})
@@ -29,6 +29,8 @@ project(Viskores_tut)
 #Find the Viskores package
 find_package(Viskores REQUIRED QUIET)
 
+#Find the Boost package
+find_package(Boost REQUIRED COMPONENTS random)
 
 if (Viskores_ENABLE_TUTORIALS)
  # Viskores tutorial targets expect viskores libraries to be namespaced with the prefix viskores::.
@@ -57,7 +59,7 @@ add_executable(vf_magnitude vf_magnitude.cxx)
 target_link_libraries(vf_magnitude viskores::filter_core viskores::filter_vector_analysis viskores::io)
 
 add_executable(vf_divergence vf_divergence.cxx)
-target_link_libraries(vf_divergence viskores::filter_core viskores::filter_vector_analysis viskores::io)
+target_link_libraries(vf_divergence PRIVATE viskores::filter_core viskores::filter_vector_analysis viskores::io Boost::random)
 
 add_executable(contour contour.cxx)
 target_link_libraries(contour viskores::filter_core viskores::filter_contour viskores::io)
