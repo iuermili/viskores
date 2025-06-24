@@ -146,6 +146,15 @@ struct ComputeDivergenceMeanAndVar : public viskores::worklet::WorkletPointNeigh
 template <typename T>
 VISKORES_EXEC T GaussianCDF(T x, T mu, T sigma)
 {
+    if (sigma <= static_cast<T>(0.0)){
+        if (x < mu) {
+            return static_cast<T>(0.0);
+        }
+        else {
+            return static_cast<T>(1.0);
+        }
+    }
+    
     return static_cast<T>(0.5) * (static_cast<T>(1.0) + erf((x - mu) / (sigma * viskores::Sqrt(2.0))));
 }
 
@@ -161,9 +170,9 @@ struct CrossingProbabilityAnalytical : public viskores::worklet::WorkletVisitCel
 
     viskores::Float64 Isovalue;
 
-    template <typename MeanVecType, typename StdDevVecType>
+    template <typename MeanVecType, typename VarVecType>
     VISKORES_EXEC viskores::Float64 operator()(const MeanVecType& divMean,
-                                                const StdDevVecType& divVar) const
+                                                const VarVecType& divVar) const
     {
         viskores::Float64 probNeg = 1.0;
         viskores::Float64 probPos = 1.0;
@@ -343,7 +352,7 @@ struct ComputeDivergence : public viskores::worklet::WorkletPointNeighborhood
                 dudx = uSamples.Get(0, 0, 0)[k] - uSamples.Get(0, -1, 0)[k];
             } 
             else {
-                dudx = uSamples.Get(0, 1, 0)[k] - uSamples.Get(0, -1, 0)[k];
+                dudx = (uSamples.Get(0, 1, 0)[k] - uSamples.Get(0, -1, 0)[k]) / 2.0;
             }
 
             if (boundary.MinNeighborIndices(1)[0] == 0) {
@@ -353,7 +362,7 @@ struct ComputeDivergence : public viskores::worklet::WorkletPointNeighborhood
                 dvdy = vSamples.Get(0, 0, 0)[k] - vSamples.Get(-1, 0, 0)[k];
             } 
             else {
-                dvdy = vSamples.Get(1, 0, 0)[k] - vSamples.Get(-1, 0, 0)[k];
+                dvdy = (vSamples.Get(1, 0, 0)[k] - vSamples.Get(-1, 0, 0)[k]) / 2.0;
             }
 
             divSamples[k] = dudx + dvdy;
@@ -510,14 +519,14 @@ int main(int argc, char* argv[])
     viskores::io::VTKDataSetWriter vf_samplingWriter("out_uncertainVectorField_sampling.vtk");
     vf_samplingWriter.WriteDataSet(vf_samplingResult);
 
-    /*// Uncertain Red Sea Dataset
+    // Uncertain Red Sea Dataset
     viskores::io::VTKDataSetReader redSea_reader("data/uncertainVectorFieldRedSea.vtk");
     viskores::cont::DataSet redSea_ds = redSea_reader.ReadDataSet();
 
     auto redSea_startAnalytical = std::chrono::high_resolution_clock::now();
 
     viskores::filter::uncertainty::VFDivergenceAnalytical redSea_analyticalFilter;
-    redSea_analyticalFilter.SetIsovalue(0.0);
+    redSea_analyticalFilter.SetIsovalue(0);
     viskores::cont::DataSet redSea_analyticalResult = redSea_analyticalFilter.Execute(redSea_ds);
 
     auto redSea_endAnalytical = std::chrono::high_resolution_clock::now();
@@ -527,7 +536,7 @@ int main(int argc, char* argv[])
     viskores::io::VTKDataSetWriter redSea_analyticalWriter("out_uncertainVectorFieldRedSea_analytical.vtk");
     redSea_analyticalWriter.WriteDataSet(redSea_analyticalResult);
 
-    auto redSea_startSampling = std::chrono::high_resolution_clock::now();
+    /*auto redSea_startSampling = std::chrono::high_resolution_clock::now();
 
     viskores::filter::uncertainty::sampling::VFDivergenceSampling redSea_samplingFilter;
     redSea_samplingFilter.SetIsovalue(0.0);
