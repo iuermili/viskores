@@ -55,7 +55,7 @@ public:
   VISKORES_CONT void SetMinAxis(
     const viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>& minCoordinate)
   {
-    this->minAxis = minCoordinate;
+    this->minAxis = viskores::Range(minCoordinate.first, minCoordinate.second);
   }
 
   /// @brief  Sets the trait rectangle's top right corner
@@ -63,7 +63,7 @@ public:
   VISKORES_CONT void SetMaxAxis(
     const viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>& maxCoordinate)
   {
-    this->maxAxis = maxCoordinate;
+    this->maxAxis = viskores::Range(maxCoordinate.first, maxCoordinate.second);
   }
 
   /// @brief Sets minimum X.
@@ -109,8 +109,8 @@ public:
   }
 
 private:
-  viskores::Pair<viskores::FloatDefault, viskores::FloatDefault> minAxis;
-  viskores::Pair<viskores::FloatDefault, viskores::FloatDefault> maxAxis;
+  viskores::Range minAxis;
+  viskores::Range maxAxis;
   std::string Approach = "ClosedForm";
   viskores::Id NumSamples = 5000;
 

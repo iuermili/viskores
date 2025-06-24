@@ -23,6 +23,7 @@
 #include <viskores/cont/testing/Testing.h>
 #include <viskores/filter/uncertainty/FiberUncertainUniform.h>
 
+
 namespace
 {
 template <typename T>
@@ -68,8 +69,8 @@ void TestFiberUncertainUniform()
 {
   viskores::cont::DataSet ds = MakeFiberUncertainUniformDataSet<viskores::FloatDefault>();
 
-  viskores::Pair<viskores::FloatDefault, viskores::FloatDefault> minAxis(15.0, 15.0);
-  viskores::Pair<viskores::FloatDefault, viskores::FloatDefault> maxAxis(25.0, 25.0);
+  viskores::Range minAxis(15.0, 15.0);
+  viskores::Range maxAxis(25.0, 25.0);
 
   const viskores::FloatDefault delta = 0.05f;
 

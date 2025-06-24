@@ -25,8 +25,9 @@
 
 #include <viskores/cont/DataSet.h>
 #include <viskores/cont/Timer.h>
-#include "./FiberUncertainUniform.h"
-#include "./worklet/FiberUncertainUniform.h"
+#include <viskores/filter/uncertainty/FiberUncertainUniform.h>
+#include <viskores/filter/uncertainty/worklet/FiberUncertainUniform.h>
+
 
 namespace viskores
 {

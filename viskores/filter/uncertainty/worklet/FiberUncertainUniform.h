@@ -24,6 +24,7 @@
 #include <viskores/filter/uncertainty/worklet/FiberUncertainUniform.h>
 #include <viskores/worklet/WorkletMapField.h>
 
+
 #if defined(VISKORES_CUDA) || defined(VISKORES_KOKKOS_HIP)
 #include <thrust/device_vector.h>
 #include <thrust/random/linear_congruential_engine.h>
@@ -45,11 +46,11 @@ public:
   // Fiber(const std::vector<std::pair<double, double>>& minAxis,
   //      const std::vector<std::pair<double, double>>& maxAxis)
   //  : InputBottomLeft(minAxis), InputTopRight(maxAxis){};
-  MultiVariateMonteCarlo(const viskores::Pair<viskores::Float64, viskores::Float64>& minAxis,
-                         const viskores::Pair<viskores::Float64, viskores::Float64>& maxAxis,
+  MultiVariateMonteCarlo(const viskores::Range& minAxis,
+                         const viskores::Range& maxAxis,
                          const viskores::Id numSamples)
-    : InputBottomLeft(minAxis)
-    , InputTopRight(maxAxis)
+    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max))
     , NumSamples(numSamples){};
 
   // Input and Output Parameters
@@ -261,10 +262,10 @@ public:
   // Fiber(const std::vector<std::pair<double, double>>& minAxis,
   //      const std::vector<std::pair<double, double>>& maxAxis)
   //  : InputBottomLeft(minAxis), InputTopRight(maxAxis){};
-  MultiVariateClosedForm(const viskores::Pair<viskores::Float64, viskores::Float64>& minAxis,
-                         const viskores::Pair<viskores::Float64, viskores::Float64>& maxAxis)
-    : InputBottomLeft(minAxis)
-    , InputTopRight(maxAxis){};
+  MultiVariateClosedForm(const viskores::Range& minAxis,
+                         const viskores::Range& maxAxis)
+    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max)) {}
 
   // Input and Output Parameters
   using ControlSignature = void(FieldIn, FieldIn, FieldIn, FieldIn, FieldOut);
@@ -396,10 +397,10 @@ private:
 class MultiVariateMean : public viskores::worklet::WorkletMapField
 {
 public:
-  MultiVariateMean(const viskores::Pair<viskores::Float64, viskores::Float64>& minAxis,
-                   const viskores::Pair<viskores::Float64, viskores::Float64>& maxAxis)
-    : InputBottomLeft(minAxis)
-    , InputTopRight(maxAxis){};
+  MultiVariateMean(const viskores::Range& minAxis,
+                   const viskores::Range& maxAxis)
+    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max)) {}
 
   // Input and Output Parameters
   using ControlSignature = void(FieldIn, FieldIn, FieldIn, FieldIn, FieldOut);
@@ -463,10 +464,10 @@ private:
 class MultiVariateTruth : public viskores::worklet::WorkletMapField
 {
 public:
-  MultiVariateTruth(const viskores::Pair<viskores::Float64, viskores::Float64>& minAxis,
-                    const viskores::Pair<viskores::Float64, viskores::Float64>& maxAxis)
-    : InputBottomLeft(minAxis)
-    , InputTopRight(maxAxis){};
+  MultiVariateTruth(const viskores::Range& minAxis,
+                    const viskores::Range& maxAxis)
+    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max)) {}
 
   // Input and Output Parameters
   using ControlSignature = void(FieldIn, FieldIn, FieldIn, FieldIn, FieldOut);
