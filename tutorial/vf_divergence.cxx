@@ -31,6 +31,8 @@
 #include <viskores/worklet/WorkletMapTopology.h>
 #include <viskores/CellShape.h>
 
+#include <iostream>
+#include <chrono>
 #include <random>
 #include <cmath>
 
@@ -87,8 +89,8 @@ struct ComputeDivergenceMeanAndVar : public viskores::worklet::WorkletPointNeigh
                                     FieldInNeighborhood varX,
                                     FieldInNeighborhood meanY,
                                     FieldInNeighborhood varY,
-                                    FieldOut divergenceMean,
-                                    FieldOut divergenceVariance);
+                                    FieldOut divMean,
+                                    FieldOut divVar);
     using ExecutionSignature = void(Boundary, _2, _3, _4, _5, _6, _7);
     using InputDomain = _1;
 
@@ -159,9 +161,9 @@ struct CrossingProbabilityAnalytical : public viskores::worklet::WorkletVisitCel
 
     viskores::Float64 Isovalue;
 
-    template <typename MeanVecType, typename VarVecType>
+    template <typename MeanVecType, typename StdDevVecType>
     VISKORES_EXEC viskores::Float64 operator()(const MeanVecType& divMean,
-                                                const VarVecType& divVar) const
+                                                const StdDevVecType& divVar) const
     {
         viskores::Float64 probNeg = 1.0;
         viskores::Float64 probPos = 1.0;
@@ -170,10 +172,8 @@ struct CrossingProbabilityAnalytical : public viskores::worklet::WorkletVisitCel
         {
             auto mean = static_cast<viskores::Float64>(divMean[i]);
             auto variance = static_cast<viskores::Float64>(divVar[i]);
-            
-            auto cdf = viskores::Sqrt(viskores::Max(variance, static_cast<viskores::Float64>(0.0)));
 
-            auto probBelow = GaussianCDF(this->Isovalue, mean, cdf);
+            auto probBelow = GaussianCDF(this->Isovalue, mean, viskores::Sqrt(viskores::Max(variance, static_cast<viskores::Float64>(0.0))));
             auto probAbove = 1.0 - probBelow;
 
             probNeg *= probBelow;
@@ -336,24 +336,24 @@ struct ComputeDivergence : public viskores::worklet::WorkletPointNeighborhood
         {
             double dudx, dvdy;
 
-            if (boundary.MinNeighborIndices(1)[0] == 0) {
-                dudx = uSamples.Get(1, 0, 0)[k] - uSamples.Get(0, 0, 0)[k];
-            } 
-            else if (boundary.MaxNeighborIndices(1)[0] == 0) {
-                dudx = uSamples.Get(0, 0, 0)[k] - uSamples.Get(-1, 0, 0)[k];
-            } 
-            else {
-                dudx = (uSamples.Get(1, 0, 0)[k] - uSamples.Get(-1, 0, 0)[k]) / 2.0;
-            }
-
             if (boundary.MinNeighborIndices(1)[1] == 0) {
-                dvdy = vSamples.Get(0, 1, 0)[k] - vSamples.Get(0, 0, 0)[k];
+                dudx = uSamples.Get(0, 1, 0)[k] - uSamples.Get(0, 0, 0)[k];
             } 
             else if (boundary.MaxNeighborIndices(1)[1] == 0) {
-                dvdy = vSamples.Get(0, 0, 0)[k] - vSamples.Get(0, -1, 0)[k];
+                dudx = uSamples.Get(0, 0, 0)[k] - uSamples.Get(0, -1, 0)[k];
             } 
             else {
-                dvdy = (vSamples.Get(0, 1, 0)[k] - vSamples.Get(0, -1, 0)[k]) / 2.0;
+                dudx = uSamples.Get(0, 1, 0)[k] - uSamples.Get(0, -1, 0)[k];
+            }
+
+            if (boundary.MinNeighborIndices(1)[0] == 0) {
+                dvdy = vSamples.Get(1, 0, 0)[k] - vSamples.Get(0, 0, 0)[k];
+            } 
+            else if (boundary.MaxNeighborIndices(1)[0] == 0) {
+                dvdy = vSamples.Get(0, 0, 0)[k] - vSamples.Get(-1, 0, 0)[k];
+            } 
+            else {
+                dvdy = vSamples.Get(1, 0, 0)[k] - vSamples.Get(-1, 0, 0)[k];
             }
 
             divSamples[k] = dudx + dvdy;
@@ -396,8 +396,9 @@ struct CrossingProbabilitySampling : public viskores::worklet::WorkletVisitCells
                 }
             }
 
-            if (this->Isovalue > minVal && this->Isovalue < maxVal)
+            if (this->Isovalue > minVal && this->Isovalue < maxVal){
                 crossings++;
+            }
         }
 
         return static_cast<double>(crossings) / NUM_SAMPLES;
@@ -479,20 +480,65 @@ int main(int argc, char* argv[])
 {
     viskores::cont::Initialize(argc, argv);
 
-    viskores::io::VTKDataSetReader reader("data/uncertainVectorField.vtk");
-    viskores::cont::DataSet ds = reader.ReadDataSet();
+    // Uncertain Vector Field Dataset
+    viskores::io::VTKDataSetReader vf_reader("data/uncertainVectorField.vtk");
+    viskores::cont::DataSet vf_ds = vf_reader.ReadDataSet();
 
-    viskores::filter::uncertainty::VFDivergenceAnalytical analyticalFilter;
-    analyticalFilter.SetIsovalue(-5.05);
-    viskores::cont::DataSet analyticalResult = analyticalFilter.Execute(ds);
-    viskores::io::VTKDataSetWriter analyticalWriter("out_vf_divergence_analytical.vtk");
-    analyticalWriter.WriteDataSet(analyticalResult);
+    auto vf_startAnalytical = std::chrono::high_resolution_clock::now();
 
-    viskores::filter::uncertainty::sampling::VFDivergenceSampling samplingFilter;
-    samplingFilter.SetIsovalue(-5.05);
-    viskores::cont::DataSet samplingResult = samplingFilter.Execute(ds);
-    viskores::io::VTKDataSetWriter samplingWriter("out_vf_divergence_sampling.vtk");
-    samplingWriter.WriteDataSet(samplingResult);
+    viskores::filter::uncertainty::VFDivergenceAnalytical vf_analyticalFilter;
+    vf_analyticalFilter.SetIsovalue(-5.05);
+    viskores::cont::DataSet vf_analyticalResult = vf_analyticalFilter.Execute(vf_ds);
+
+    auto vf_endAnalytical = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> vf_analyticalDuration = vf_endAnalytical - vf_startAnalytical;
+    std::cout << "(uncertainVectorField.vtk) Analytical Approach Computation Time: " << vf_analyticalDuration.count() << " seconds" << std::endl;
+
+    viskores::io::VTKDataSetWriter vf_analyticalWriter("out_uncertainVectorField_analytical.vtk");
+    vf_analyticalWriter.WriteDataSet(vf_analyticalResult);
+
+    auto vf_startSampling = std::chrono::high_resolution_clock::now();
+
+    viskores::filter::uncertainty::sampling::VFDivergenceSampling vf_samplingFilter;
+    vf_samplingFilter.SetIsovalue(-5.05);
+    viskores::cont::DataSet vf_samplingResult = vf_samplingFilter.Execute(vf_ds);
+
+    auto vf_endSampling = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> vf_samplingDuration = vf_endSampling - vf_startSampling;
+    std::cout << "(uncertainVectorField.vtk) Sampling Approach Computation Time: " << vf_samplingDuration.count() << " seconds" << std::endl;
+
+    viskores::io::VTKDataSetWriter vf_samplingWriter("out_uncertainVectorField_sampling.vtk");
+    vf_samplingWriter.WriteDataSet(vf_samplingResult);
+
+    /*// Uncertain Red Sea Dataset
+    viskores::io::VTKDataSetReader redSea_reader("data/uncertainVectorFieldRedSea.vtk");
+    viskores::cont::DataSet redSea_ds = redSea_reader.ReadDataSet();
+
+    auto redSea_startAnalytical = std::chrono::high_resolution_clock::now();
+
+    viskores::filter::uncertainty::VFDivergenceAnalytical redSea_analyticalFilter;
+    redSea_analyticalFilter.SetIsovalue(0.0);
+    viskores::cont::DataSet redSea_analyticalResult = redSea_analyticalFilter.Execute(redSea_ds);
+
+    auto redSea_endAnalytical = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> redSea_analyticalDuration = redSea_endAnalytical - redSea_startAnalytical;
+    std::cout << "(uncertainVectorFieldRedSea.vtk) Analytical Approach Computation Time: " << redSea_analyticalDuration.count() << " seconds" << std::endl;
+
+    viskores::io::VTKDataSetWriter redSea_analyticalWriter("out_uncertainVectorFieldRedSea_analytical.vtk");
+    redSea_analyticalWriter.WriteDataSet(redSea_analyticalResult);
+
+    auto redSea_startSampling = std::chrono::high_resolution_clock::now();
+
+    viskores::filter::uncertainty::sampling::VFDivergenceSampling redSea_samplingFilter;
+    redSea_samplingFilter.SetIsovalue(0.0);
+    viskores::cont::DataSet redSea_samplingResult = redSea_samplingFilter.Execute(redSea_ds);
+
+    auto redSea_endSampling = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> redSea_samplingDuration = redSea_endSampling - redSea_startSampling;
+    std::cout << "(uncertainVectorFieldRedSea.vtk) Sampling Approach Computation Time: " << redSea_samplingDuration.count() << " seconds" << std::endl;
+
+    viskores::io::VTKDataSetWriter redSea_samplingWriter("out_uncertainVectorFieldRedSea_sampling.vtk");
+    redSea_samplingWriter.WriteDataSet(redSea_samplingResult);*/
 
     return 0;
 }
