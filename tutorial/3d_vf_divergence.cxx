@@ -343,7 +343,7 @@ struct Sampling: public viskores::worklet::WorkletPointNeighborhood
                                     SampleVec& vSamples,
                                     SampleVec& wSamples) const 
     {
-        std::size_t hash = std::hash<double>()(meanX.Get(0,0,0)) ^ std::hash<double>()(meanY.Get(0,0,0) ^ std::hash<double>(meanZ.Get(0,0,0,)));
+        std::size_t hash = std::hash<double>()(meanX.Get(0,0,0)) ^ std::hash<double>()(meanY.Get(0,0,0)) ^ std::hash<double>(meanZ.Get(0,0,0,));
         std::mt19937 rng(Seed ^ hash);
         std::normal_distribution<double> distU(meanX.Get(0,0,0), std::sqrt(varX.Get(0,0,0)));
         std::normal_distribution<double> distV(meanY.Get(0,0,0), std::sqrt(varY.Get(0,0,0)));
@@ -363,8 +363,9 @@ struct ComputeDivergence : public viskores::worklet::WorkletPointNeighborhood
     using ControlSignature = void(CellSetIn domain,
                                     FieldInNeighborhood uSamples,
                                     FieldInNeighborhood vSamples,
+                                    FieldInNeighborhood wSamples,
                                     FieldOut divergenceSamples);
-    using ExecutionSignature = void(Boundary, _2, _3, _4);
+    using ExecutionSignature = void(Boundary, _2, _3, _4, _5);
     using InputDomain = _1;
 
     viskores::Id NumSamples;
@@ -373,6 +374,7 @@ struct ComputeDivergence : public viskores::worklet::WorkletPointNeighborhood
     VISKORES_EXEC void operator()(const BoundaryType& boundary,
                                     const USamplesType& uSamples,
                                     const VSamplesType& vSamples,
+                                    const USamplesType& wSamples,
                                     OutType& divSamples) const
     {
         for (viskores::Id k = 0; k < NUM_SAMPLES; ++k)
@@ -400,13 +402,13 @@ struct ComputeDivergence : public viskores::worklet::WorkletPointNeighborhood
             }
 
             if (boundary.MinNeighborIndices(1)[2] == 0) {
-                dwdz = vSamples.Get(0, 0, 1)[k] - vSamples.Get(0, 0, 0)[k];
+                dwdz = wSamples.Get(0, 0, 1)[k] - wSamples.Get(0, 0, 0)[k];
             } 
             else if (boundary.MaxNeighborIndices(1)[2] == 0) {
-                dwdz = vSamples.Get(0, 0, 0)[k] - vSamples.Get(0, 0, -1)[k];
+                dwdz = wSamples.Get(0, 0, 0)[k] - wSamples.Get(0, 0, -1)[k];
             } 
             else {
-                dwdz = (vSamples.Get(0, 0, 1)[k] - vSamples.Get(0, 0, -1)[k]) / 2.0;
+                dwdz = (wSamples.Get(0, 0, 1)[k] - wSamples.Get(0, 0, -1)[k]) / 2.0;
             }
 
             divSamples[k] = dudx + dvdy + dwdz;
