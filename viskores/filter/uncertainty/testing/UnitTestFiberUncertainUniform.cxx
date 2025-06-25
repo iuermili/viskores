@@ -78,7 +78,7 @@ void TestFiberUncertainUniform()
   closedFormFilter.SetMinAxis(viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>
     (static_cast<viskores::FloatDefault>(minAxis.Min),
      static_cast<viskores::FloatDefault>(minAxis.Max)));
-  closedFormFilter..SetMaxAxis(viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>
+  closedFormFilter.SetMaxAxis(viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>
     (static_cast<viskores::FloatDefault>(maxAxis.Min),
      static_cast<viskores::FloatDefault>(maxAxis.Max)));
   closedFormFilter.SetMinX("ensemble_min_x");
@@ -100,7 +100,7 @@ void TestFiberUncertainUniform()
   monteCarloFilter.SetMinAxis(viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>
     (static_cast<viskores::FloatDefault>(minAxis.Min),
      static_cast<viskores::FloatDefault>(minAxis.Max)));
-  monteCarloFilter..SetMaxAxis(viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>
+  monteCarloFilter.SetMaxAxis(viskores::Pair<viskores::FloatDefault, viskores::FloatDefault>
     (static_cast<viskores::FloatDefault>(maxAxis.Min),
      static_cast<viskores::FloatDefault>(maxAxis.Max)));
   monteCarloFilter.SetMinX("ensemble_min_x");
