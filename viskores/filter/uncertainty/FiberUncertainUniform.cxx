@@ -66,10 +66,10 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
     viskores::cont::ArrayHandle<ValueType> Probability;
     // Invoker
 
-    if (this->Approach == "MonteCarlo")
+    if (this->Approach == ApproachEnum::MonteCarlo)
     {
       FieldName = "MonteCarlo";
-      std::cout << "Adopt Monte Carlo with numsamples " << this->NumSamples << std::endl;
+      VISKORES_LOG_S(viskores::cont::LogLevel::Info, "Adopt Monte Carlo with numsamples " << this->NumSamples);
       this->Invoke(viskores::worklet::detail::MultiVariateMonteCarlo{ this->minAxis,
                                                                   this->maxAxis,
                                                                   this->NumSamples },
@@ -79,7 +79,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
                    ConcreteEnsembleMaxY,
                    Probability);
     }
-    else if (this->Approach == "ClosedForm")
+    else if (this->Approach == ApproachEnum::ClosedForm)
     {
       FieldName = "ClosedForm";
       std::cout << "Adopt ClosedForm" << std::endl;
@@ -90,7 +90,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
                    ConcreteEnsembleMaxY,
                    Probability);
     }
-    else if (this->Approach == "Mean")
+    else if (this->Approach == ApproachEnum::Mean)
     {
       FieldName = "Mean";
       std::cout << "Adopt Mean" << std::endl;
@@ -101,7 +101,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
                    ConcreteEnsembleMaxY,
                    Probability);
     }
-    else if (this->Approach == "Truth")
+    else if (this->Approach == ApproachEnum::Truth)
     {
       FieldName = "Truth";
       std::cout << "Adopt Truth" << std::endl;
@@ -114,7 +114,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
     }
     else
     {
-      throw std::runtime_error("unsupported approach:" + this->Approach);
+      throw std::runtime_error(std::string("Unsupported approach."));
     }
 
 

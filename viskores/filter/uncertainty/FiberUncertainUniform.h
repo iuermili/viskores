@@ -101,9 +101,17 @@ public:
     this->NumSamples = numSamples;
   }
 
+  /// @brief Supported approaches for uncertain fiber surfaces.
+  enum struct ApproachEnum {
+    MonteCarlo,
+    ClosedForm,
+    Mean,
+    Truth
+  };
+
   /// @brief Sets the approach for computing uncertainty (ClosedForm or  MonteCarlo).
   ///  Sets the approach for the corresponding filter that was selected.
-  VISKORES_CONT void SetApproach(const std::string& approach)
+  VISKORES_CONT void SetApproach(ApproachEnum approach)
   {
     this->Approach = approach;
   }
@@ -111,7 +119,7 @@ public:
 private:
   viskores::Range minAxis;
   viskores::Range maxAxis;
-  std::string Approach = "ClosedForm";
+  ApproachEnum Approach = ApproachEnum::ClosedForm;
   viskores::Id NumSamples = 5000;
 
   VISKORES_CONT viskores::cont::DataSet DoExecute(
