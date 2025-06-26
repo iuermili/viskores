@@ -52,7 +52,6 @@ set_target_properties(
 
 target_link_libraries(viskores_filter PUBLIC INTERFACE
   viskores_filter_core
-  viskores_filter_uncertainty
   )
 
 viskores_install_targets(TARGETS viskores_filter)

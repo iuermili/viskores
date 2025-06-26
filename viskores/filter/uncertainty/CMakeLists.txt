@@ -40,6 +40,10 @@ viskores_library(
   USE_VISKORES_JOB_POOL
 )
 
+target_link_libraries(viskores_filter_uncertainty PUBLIC INTERFACE
+  viskores_filter_core
+)
+
 install(
   DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/worklet
   DESTINATION ${Viskores_INSTALL_INCLUDE_DIR}/viskores/filter/uncertainty
