@@ -118,7 +118,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
     }
     else
     {
-      throw viskores::cont::ErrorBadValue("Unsupported uncertain fiber surface approach");
+      throw viskores::cont::ErrorBadValue("Unsupported uncertain fiber surface approach.");
     }
 
     OutputProbability = Probability;
