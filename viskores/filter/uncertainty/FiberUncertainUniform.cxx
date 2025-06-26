@@ -125,12 +125,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
   };
   this->CastAndCallScalarField(EnsembleMinX, resolveType);
 
-
-  viskores::cont::DataSet result = this->CreateResult(input);
-  result.AddPointField(FieldName, OutputProbability);
-
-
-  return result;
+  return this->CreateResultFieldPoint(input, FieldName, OutputProbability);
 }
 }
 }
