@@ -35,11 +35,12 @@ namespace filter
 {
 namespace uncertainty
 {
-VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const viskores::cont::DataSet& input)
+VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
+  const viskores::cont::DataSet& input)
 {
   std::string FieldName;
 
-  
+
   viskores::cont::Field EnsembleMinX = this->GetFieldFromDataSet(0, input);
   viskores::cont::Field EnsembleMaxX = this->GetFieldFromDataSet(1, input);
   viskores::cont::Field EnsembleMinY = this->GetFieldFromDataSet(2, input);
@@ -50,7 +51,8 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
 
 
   //  For Invoker
-  auto resolveType = [&](auto ConcreteEnsembleMinX) {
+  auto resolveType = [&](auto ConcreteEnsembleMinX)
+  {
     //  Obtaining Type
     using ArrayType = std::decay_t<decltype(ConcreteEnsembleMinX)>;
     using ValueType = typename ArrayType::ValueType;
@@ -69,10 +71,11 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
     if (this->Approach == ApproachEnum::MonteCarlo)
     {
       FieldName = "MonteCarlo";
-      VISKORES_LOG_S(viskores::cont::LogLevel::Info, "Adopt Monte Carlo with numsamples " << this->NumSamples);
+      VISKORES_LOG_S(viskores::cont::LogLevel::Info,
+                     "Adopt Monte Carlo with numsamples " << this->NumSamples);
       this->Invoke(viskores::worklet::detail::MultiVariateMonteCarlo{ this->minAxis,
-                                                                  this->maxAxis,
-                                                                  this->NumSamples },
+                                                                      this->maxAxis,
+                                                                      this->NumSamples },
                    ConcreteEnsembleMinX,
                    ConcreteEnsembleMaxX,
                    ConcreteEnsembleMinY,
@@ -83,12 +86,13 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(const vis
     {
       FieldName = "ClosedForm";
       std::cout << "Adopt ClosedForm" << std::endl;
-      this->Invoke(viskores::worklet::detail::MultiVariateClosedForm{ this->minAxis, this->maxAxis },
-                   ConcreteEnsembleMinX,
-                   ConcreteEnsembleMaxX,
-                   ConcreteEnsembleMinY,
-                   ConcreteEnsembleMaxY,
-                   Probability);
+      this->Invoke(
+        viskores::worklet::detail::MultiVariateClosedForm{ this->minAxis, this->maxAxis },
+        ConcreteEnsembleMinX,
+        ConcreteEnsembleMaxX,
+        ConcreteEnsembleMinY,
+        ConcreteEnsembleMaxY,
+        Probability);
     }
     else if (this->Approach == ApproachEnum::Mean)
     {

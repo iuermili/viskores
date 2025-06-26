@@ -49,7 +49,8 @@ public:
   MultiVariateMonteCarlo(const viskores::Range& minAxis,
                          const viskores::Range& maxAxis,
                          const viskores::Id numSamples)
-    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    : InputBottomLeft(
+        viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
     , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max))
     , NumSamples(numSamples){};
 
@@ -63,10 +64,10 @@ public:
   template <typename MinX, typename MaxX, typename MinY, typename MaxY, typename OutCellFieldType>
   // Operator
   VISKORES_EXEC void operator()(const MinX& EnsembleMinX,
-                            const MaxX& EnsembleMaxX,
-                            const MinY& EnsembleMinY,
-                            const MaxY& EnsembleMaxY,
-                            OutCellFieldType& probability) const
+                                const MaxX& EnsembleMaxX,
+                                const MinY& EnsembleMinY,
+                                const MaxY& EnsembleMaxY,
+                                OutCellFieldType& probability) const
   {
     // User defined rectangle (trait)
     viskores::FloatDefault minX_user = static_cast<viskores::FloatDefault>(InputBottomLeft.first);
@@ -262,10 +263,12 @@ public:
   // Fiber(const std::vector<std::pair<double, double>>& minAxis,
   //      const std::vector<std::pair<double, double>>& maxAxis)
   //  : InputBottomLeft(minAxis), InputTopRight(maxAxis){};
-  MultiVariateClosedForm(const viskores::Range& minAxis,
-                         const viskores::Range& maxAxis)
-    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
-    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max)) {}
+  MultiVariateClosedForm(const viskores::Range& minAxis, const viskores::Range& maxAxis)
+    : InputBottomLeft(
+        viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max))
+  {
+  }
 
   // Input and Output Parameters
   using ControlSignature = void(FieldIn, FieldIn, FieldIn, FieldIn, FieldOut);
@@ -277,10 +280,10 @@ public:
   template <typename MinX, typename MaxX, typename MinY, typename MaxY, typename OutCellFieldType>
   // Operator
   VISKORES_EXEC void operator()(const MinX& EnsembleMinX,
-                            const MaxX& EnsembleMaxX,
-                            const MinY& EnsembleMinY,
-                            const MaxY& EnsembleMaxY,
-                            OutCellFieldType& probability) const
+                                const MaxX& EnsembleMaxX,
+                                const MinY& EnsembleMinY,
+                                const MaxY& EnsembleMaxY,
+                                OutCellFieldType& probability) const
   {
     // User defined rectangle (trait)
     viskores::FloatDefault minX_user = 0.0;
@@ -375,7 +378,8 @@ public:
       IntersectionHeight = maxY_intersection - minY_intersection;
       IntersectionWidth = maxX_intersection - minX_intersection;
 
-      viskores::FloatDefault DataArea = (maxX_dataset - minX_dataset) * (maxY_dataset - minY_dataset);
+      viskores::FloatDefault DataArea =
+        (maxX_dataset - minX_dataset) * (maxY_dataset - minY_dataset);
 
       if ((IntersectionHeight > 0) && (IntersectionWidth > 0) &&
           (minX_intersection < maxX_intersection) && (minY_intersection < maxY_intersection))
@@ -397,10 +401,12 @@ private:
 class MultiVariateMean : public viskores::worklet::WorkletMapField
 {
 public:
-  MultiVariateMean(const viskores::Range& minAxis,
-                   const viskores::Range& maxAxis)
-    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
-    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max)) {}
+  MultiVariateMean(const viskores::Range& minAxis, const viskores::Range& maxAxis)
+    : InputBottomLeft(
+        viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max))
+  {
+  }
 
   // Input and Output Parameters
   using ControlSignature = void(FieldIn, FieldIn, FieldIn, FieldIn, FieldOut);
@@ -411,10 +417,10 @@ public:
   template <typename MinX, typename MaxX, typename MinY, typename MaxY, typename OutCellFieldType>
 
   VISKORES_EXEC void operator()(const MinX& EnsembleMinX,
-                            const MaxX& EnsembleMaxX,
-                            const MinY& EnsembleMinY,
-                            const MaxY& EnsembleMaxY,
-                            OutCellFieldType& probability) const
+                                const MaxX& EnsembleMaxX,
+                                const MinY& EnsembleMinY,
+                                const MaxY& EnsembleMaxY,
+                                OutCellFieldType& probability) const
   {
 
     // User defined rectangle (trait)
@@ -464,10 +470,12 @@ private:
 class MultiVariateTruth : public viskores::worklet::WorkletMapField
 {
 public:
-  MultiVariateTruth(const viskores::Range& minAxis,
-                    const viskores::Range& maxAxis)
-    : InputBottomLeft(viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
-    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max)) {}
+  MultiVariateTruth(const viskores::Range& minAxis, const viskores::Range& maxAxis)
+    : InputBottomLeft(
+        viskores::Pair<viskores::Float64, viskores::Float64>(minAxis.Min, minAxis.Max))
+    , InputTopRight(viskores::Pair<viskores::Float64, viskores::Float64>(maxAxis.Min, maxAxis.Max))
+  {
+  }
 
   // Input and Output Parameters
   using ControlSignature = void(FieldIn, FieldIn, FieldIn, FieldIn, FieldOut);
@@ -478,10 +486,10 @@ public:
   template <typename MinX, typename MaxX, typename MinY, typename MaxY, typename OutCellFieldType>
 
   VISKORES_EXEC void operator()(const MinX& EnsembleMinX,
-                            const MaxX& EnsembleMaxX,
-                            const MinY& EnsembleMinY,
-                            const MaxY& EnsembleMaxY,
-                            OutCellFieldType& probability) const
+                                const MaxX& EnsembleMaxX,
+                                const MinY& EnsembleMinY,
+                                const MaxY& EnsembleMaxY,
+                                OutCellFieldType& probability) const
   {
 
     // User defined rectangle (trait)

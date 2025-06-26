@@ -19,9 +19,9 @@
 //  This code is based on the algorithm presented in the following paper:
 //  Hari, G., Joshi, N., Wang, Z., Gong, Q., Pugmire, D., Moreland, K.,
 //  Johnson, C. R., Klasky, S., Podhorszki, N., and Athawale, T. M.
-//  (2024). "FunM2C: A Filter for Uncertainty Visualization of Multivariate Data on Multi-Core Devices," 
-//  in 2024 IEEE Workshop on Uncertainty Visualization: Applications, Techniques, Software, and Decision Frameworks, 
-//  St Pete Beach, FL, USA, 2024, pp. 43-47, doi: 10.1109/UncertaintyVisualization63963.2024.00010. 
+//  (2024). "FunM2C: A Filter for Uncertainty Visualization of Multivariate Data on Multi-Core Devices,"
+//  in 2024 IEEE Workshop on Uncertainty Visualization: Applications, Techniques, Software, and Decision Frameworks,
+//  St Pete Beach, FL, USA, 2024, pp. 43-47, doi: 10.1109/UncertaintyVisualization63963.2024.00010.
 
 #ifndef viskores_filter_uncertainty_FiberUncertainUniform_h
 #define viskores_filter_uncertainty_FiberUncertainUniform_h
@@ -38,11 +38,11 @@ namespace uncertainty
 /// @brief Visualize fiber uncertainty for uniform distributed data.
 ///
 /// This filter computes the positional probability of fibers (bivariate features) as a
-/// function of uncertainty in the input bivariate data (with variables denoted by X and Y). 
-/// The data are sampled on a regular grid, and the uncertainty in the data for each variable 
-/// is assumed to be uniformly distributed. The uniform distribution range is estimated from 
-/// the input datasets via the minimum and maximum values of variables X and Y observed across 
-/// the ensemble. 
+/// function of uncertainty in the input bivariate data (with variables denoted by X and Y).
+/// The data are sampled on a regular grid, and the uncertainty in the data for each variable
+/// is assumed to be uniformly distributed. The uniform distribution range is estimated from
+/// the input datasets via the minimum and maximum values of variables X and Y observed across
+/// the ensemble.
 ///
 class VISKORES_FILTER_UNCERTAINTY_EXPORT FiberUncertainUniform : public viskores::filter::Filter
 {
@@ -102,7 +102,8 @@ public:
   }
 
   /// @brief Supported approaches for uncertain fiber surfaces.
-  enum struct ApproachEnum {
+  enum struct ApproachEnum
+  {
     MonteCarlo,
     ClosedForm,
     Mean,
@@ -111,10 +112,7 @@ public:
 
   /// @brief Sets the approach for computing uncertainty (ClosedForm or  MonteCarlo).
   ///  Sets the approach for the corresponding filter that was selected.
-  VISKORES_CONT void SetApproach(ApproachEnum approach)
-  {
-    this->Approach = approach;
-  }
+  VISKORES_CONT void SetApproach(ApproachEnum approach) { this->Approach = approach; }
 
 private:
   viskores::Range minAxis;
@@ -122,12 +120,11 @@ private:
   ApproachEnum Approach = ApproachEnum::ClosedForm;
   viskores::Id NumSamples = 5000;
 
-  VISKORES_CONT viskores::cont::DataSet DoExecute(
-    const viskores::cont::DataSet& input) override;
+  VISKORES_CONT viskores::cont::DataSet DoExecute(const viskores::cont::DataSet& input) override;
 };
 
-} 
-} 
-} 
+}
+}
+}
 
 #endif
