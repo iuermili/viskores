@@ -38,16 +38,16 @@ namespace uncertainty
 VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
   const viskores::cont::DataSet& input)
 {
-  std::string FieldName;
+  std::string fieldName;
 
 
-  viskores::cont::Field EnsembleMinX = this->GetFieldFromDataSet(0, input);
-  viskores::cont::Field EnsembleMaxX = this->GetFieldFromDataSet(1, input);
-  viskores::cont::Field EnsembleMinY = this->GetFieldFromDataSet(2, input);
-  viskores::cont::Field EnsembleMaxY = this->GetFieldFromDataSet(3, input);
+  viskores::cont::Field ensembleMinX = this->GetFieldFromDataSet(0, input);
+  viskores::cont::Field ensembleMaxX = this->GetFieldFromDataSet(1, input);
+  viskores::cont::Field ensembleMinY = this->GetFieldFromDataSet(2, input);
+  viskores::cont::Field ensembleMaxY = this->GetFieldFromDataSet(3, input);
 
   // Output Field
-  viskores::cont::UnknownArrayHandle OutputProbability;
+  viskores::cont::UnknownArrayHandle outputProbability;
 
 
   //  For Invoker
@@ -61,16 +61,16 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
     ArrayType ConcreteEnsembleMinY;
     ArrayType ConcreteEnsembleMaxY;
 
-    viskores::cont::ArrayCopyShallowIfPossible(EnsembleMaxX.GetData(), ConcreteEnsembleMaxX);
-    viskores::cont::ArrayCopyShallowIfPossible(EnsembleMinY.GetData(), ConcreteEnsembleMinY);
-    viskores::cont::ArrayCopyShallowIfPossible(EnsembleMaxY.GetData(), ConcreteEnsembleMaxY);
+    viskores::cont::ArrayCopyShallowIfPossible(ensembleMaxX.GetData(), ConcreteEnsembleMaxX);
+    viskores::cont::ArrayCopyShallowIfPossible(ensembleMinY.GetData(), ConcreteEnsembleMinY);
+    viskores::cont::ArrayCopyShallowIfPossible(ensembleMaxY.GetData(), ConcreteEnsembleMaxY);
 
     viskores::cont::ArrayHandle<ValueType> Probability;
     // Invoker
 
     if (this->Approach == ApproachEnum::MonteCarlo)
     {
-      FieldName = "MonteCarlo";
+      fieldName = "MonteCarlo";
       VISKORES_LOG_S(viskores::cont::LogLevel::Info,
                      "Adopt Monte Carlo with numsamples " << this->NumSamples);
       this->Invoke(viskores::worklet::detail::MultiVariateMonteCarlo{ this->minAxis,
@@ -84,7 +84,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
     }
     else if (this->Approach == ApproachEnum::ClosedForm)
     {
-      FieldName = "ClosedForm";
+      fieldName = "ClosedForm";
       std::cout << "Adopt ClosedForm" << std::endl;
       this->Invoke(
         viskores::worklet::detail::MultiVariateClosedForm{ this->minAxis, this->maxAxis },
@@ -96,7 +96,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
     }
     else if (this->Approach == ApproachEnum::Mean)
     {
-      FieldName = "Mean";
+      fieldName = "Mean";
       std::cout << "Adopt Mean" << std::endl;
       this->Invoke(viskores::worklet::detail::MultiVariateMean{ this->minAxis, this->maxAxis },
                    ConcreteEnsembleMinX,
@@ -107,7 +107,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
     }
     else if (this->Approach == ApproachEnum::Truth)
     {
-      FieldName = "Truth";
+      fieldName = "Truth";
       std::cout << "Adopt Truth" << std::endl;
       this->Invoke(viskores::worklet::detail::MultiVariateTruth{ this->minAxis, this->maxAxis },
                    ConcreteEnsembleMinX,
@@ -121,11 +121,11 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
       throw viskores::cont::ErrorBadValue("Unsupported uncertain fiber surface approach.");
     }
 
-    OutputProbability = Probability;
+    outputProbability = Probability;
   };
-  this->CastAndCallScalarField(EnsembleMinX, resolveType);
+  this->CastAndCallScalarField(ensembleMinX, resolveType);
 
-  return this->CreateResultFieldPoint(input, FieldName, OutputProbability);
+  return this->CreateResultFieldPoint(input, fieldName, outputProbability);
 }
 }
 }
