@@ -29,8 +29,6 @@ set(uncertainty_sources_device
   FiberUncertainUniform.cxx
   )
 
-viskores_declare_headers(${uncertainty_headers})
-
 viskores_library(
   NAME viskores_filter_uncertainty
   HEADERS ${uncertainty_headers}
