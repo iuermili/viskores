@@ -65,7 +65,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
     viskores::cont::ArrayCopyShallowIfPossible(ensembleMinY.GetData(), concreteEnsembleMinY);
     viskores::cont::ArrayCopyShallowIfPossible(ensembleMaxY.GetData(), concreteEnsembleMaxY);
 
-    viskores::cont::ArrayHandle<ValueType> Probability;
+    viskores::cont::ArrayHandle<ValueType> probability;
     // Invoker
 
     if (this->Approach == ApproachEnum::MonteCarlo)
@@ -80,7 +80,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
                    concreteEnsembleMaxX,
                    concreteEnsembleMinY,
                    concreteEnsembleMaxY,
-                   Probability);
+                   probability);
     }
     else if (this->Approach == ApproachEnum::ClosedForm)
     {
@@ -92,7 +92,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
         concreteEnsembleMaxX,
         concreteEnsembleMinY,
         concreteEnsembleMaxY,
-        Probability);
+        probability);
     }
     else if (this->Approach == ApproachEnum::Mean)
     {
@@ -103,7 +103,7 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
                    concreteEnsembleMaxX,
                    concreteEnsembleMinY,
                    concreteEnsembleMaxY,
-                   Probability);
+                   probability);
     }
     else if (this->Approach == ApproachEnum::Truth)
     {
@@ -114,14 +114,14 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
                    concreteEnsembleMaxX,
                    concreteEnsembleMinY,
                    concreteEnsembleMaxY,
-                   Probability);
+                   probability);
     }
     else
     {
       throw viskores::cont::ErrorBadValue("Unsupported uncertain fiber surface approach.");
     }
 
-    outputProbability = Probability;
+    outputProbability = probability;
   };
   this->CastAndCallScalarField(ensembleMinX, resolveType);
 
