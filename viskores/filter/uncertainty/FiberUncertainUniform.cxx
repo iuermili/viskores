@@ -51,19 +51,19 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
 
 
   //  For Invoker
-  auto resolveType = [&](auto ConcreteEnsembleMinX)
+  auto resolveType = [&](auto concreteEnsembleMinX)
   {
     //  Obtaining Type
-    using ArrayType = std::decay_t<decltype(ConcreteEnsembleMinX)>;
+    using ArrayType = std::decay_t<decltype(concreteEnsembleMinX)>;
     using ValueType = typename ArrayType::ValueType;
 
-    ArrayType ConcreteEnsembleMaxX;
-    ArrayType ConcreteEnsembleMinY;
-    ArrayType ConcreteEnsembleMaxY;
+    ArrayType concreteEnsembleMaxX;
+    ArrayType concreteEnsembleMinY;
+    ArrayType concreteEnsembleMaxY;
 
-    viskores::cont::ArrayCopyShallowIfPossible(ensembleMaxX.GetData(), ConcreteEnsembleMaxX);
-    viskores::cont::ArrayCopyShallowIfPossible(ensembleMinY.GetData(), ConcreteEnsembleMinY);
-    viskores::cont::ArrayCopyShallowIfPossible(ensembleMaxY.GetData(), ConcreteEnsembleMaxY);
+    viskores::cont::ArrayCopyShallowIfPossible(ensembleMaxX.GetData(), concreteEnsembleMaxX);
+    viskores::cont::ArrayCopyShallowIfPossible(ensembleMinY.GetData(), concreteEnsembleMinY);
+    viskores::cont::ArrayCopyShallowIfPossible(ensembleMaxY.GetData(), concreteEnsembleMaxY);
 
     viskores::cont::ArrayHandle<ValueType> Probability;
     // Invoker
@@ -76,10 +76,10 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
       this->Invoke(viskores::worklet::detail::MultiVariateMonteCarlo{ this->minAxis,
                                                                       this->maxAxis,
                                                                       this->NumSamples },
-                   ConcreteEnsembleMinX,
-                   ConcreteEnsembleMaxX,
-                   ConcreteEnsembleMinY,
-                   ConcreteEnsembleMaxY,
+                   concreteEnsembleMinX,
+                   concreteEnsembleMaxX,
+                   concreteEnsembleMinY,
+                   concreteEnsembleMaxY,
                    Probability);
     }
     else if (this->Approach == ApproachEnum::ClosedForm)
@@ -88,10 +88,10 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
       std::cout << "Adopt ClosedForm" << std::endl;
       this->Invoke(
         viskores::worklet::detail::MultiVariateClosedForm{ this->minAxis, this->maxAxis },
-        ConcreteEnsembleMinX,
-        ConcreteEnsembleMaxX,
-        ConcreteEnsembleMinY,
-        ConcreteEnsembleMaxY,
+        concreteEnsembleMinX,
+        concreteEnsembleMaxX,
+        concreteEnsembleMinY,
+        concreteEnsembleMaxY,
         Probability);
     }
     else if (this->Approach == ApproachEnum::Mean)
@@ -99,10 +99,10 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
       fieldName = "Mean";
       std::cout << "Adopt Mean" << std::endl;
       this->Invoke(viskores::worklet::detail::MultiVariateMean{ this->minAxis, this->maxAxis },
-                   ConcreteEnsembleMinX,
-                   ConcreteEnsembleMaxX,
-                   ConcreteEnsembleMinY,
-                   ConcreteEnsembleMaxY,
+                   concreteEnsembleMinX,
+                   concreteEnsembleMaxX,
+                   concreteEnsembleMinY,
+                   concreteEnsembleMaxY,
                    Probability);
     }
     else if (this->Approach == ApproachEnum::Truth)
@@ -110,10 +110,10 @@ VISKORES_CONT viskores::cont::DataSet FiberUncertainUniform::DoExecute(
       fieldName = "Truth";
       std::cout << "Adopt Truth" << std::endl;
       this->Invoke(viskores::worklet::detail::MultiVariateTruth{ this->minAxis, this->maxAxis },
-                   ConcreteEnsembleMinX,
-                   ConcreteEnsembleMaxX,
-                   ConcreteEnsembleMinY,
-                   ConcreteEnsembleMaxY,
+                   concreteEnsembleMinX,
+                   concreteEnsembleMaxX,
+                   concreteEnsembleMinY,
+                   concreteEnsembleMaxY,
                    Probability);
     }
     else
