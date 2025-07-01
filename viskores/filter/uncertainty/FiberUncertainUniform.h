@@ -96,7 +96,7 @@ public:
 
   /// @brief Sets number of samples.
   /// Sets how many samples will be used when computing fiber uncertainty using the Monte Carlo approach.
-  VISKORES_CONT void SetNumSamples(const viskores::Id& numSamples)
+  VISKORES_CONT void SetNumberOfSamples(const viskores::Id& numSamples)
   {
     this->NumSamples = numSamples;
   }

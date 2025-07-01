@@ -111,7 +111,7 @@ void TestFiberUncertainUniform()
   monteCarloFilter.SetApproach(
     viskores::filter::uncertainty::FiberUncertainUniform::ApproachEnum::MonteCarlo);
 
-  monteCarloFilter.SetNumSamples(5000);
+  monteCarloFilter.SetNumberOfSamples(5000);
   viskores::cont::DataSet outputMC = monteCarloFilter.Execute(ds);
   viskores::cont::Field monteField = outputMC.GetField("MonteCarlo");
   viskores::cont::UnknownArrayHandle unknownMC = monteField.GetData();
