@@ -23,6 +23,7 @@
 #include<viskores/cont/Field.h>
 #include <viskores/cont/Initialize.h>
 #include <viskores/cont/Invoker.h>
+#include <viskores/cont/RuntimeDeviceTracker.h>
 #include <viskores/filter/Filter.h>
 #include <viskores/io/VTKDataSetReader.h>
 #include <viskores/io/VTKDataSetWriter.h>
@@ -35,6 +36,8 @@
 #include <chrono>
 #include <random>
 #include <cmath>
+
+#include <omp.h>
 
 // Forward Declaration for Analytical and Sampling Approaches
 namespace viskores
@@ -483,8 +486,8 @@ viskores::cont::DataSet VFDivergenceSampling::DoExecute(const viskores::cont::Da
 } // namespace filter
 } // namespace viskores
 
-// Main Function: reads VTK dataset, creates instance of filter, sets filter parameters, executes filter, and writes output to file.
-int main(int argc, char* argv[])
+
+/*int main(int argc, char* argv[])
 {
     viskores::cont::Initialize(argc, argv);
 
@@ -517,36 +520,99 @@ int main(int argc, char* argv[])
 
     viskores::io::VTKDataSetWriter vf_samplingWriter("out_uncertainVectorField_sampling.vtk");
     vf_samplingWriter.WriteDataSet(vf_samplingResult);
+}*/
 
-    /*// Uncertain Red Sea Dataset
-    viskores::io::VTKDataSetReader redSea_reader("data/uncertainVectorFieldRedSea.vtk");
-    viskores::cont::DataSet redSea_ds = redSea_reader.ReadDataSet();
+int main(int argc, char* argv[]) {
+    viskores::cont::Initialize(argc, argv);
 
-    auto redSea_startAnalytical = std::chrono::high_resolution_clock::now();
+    viskores::io::VTKDataSetReader reader("data/uncertainRedSea2D.vtk");
+    viskores::cont::DataSet ds = reader.ReadDataSet();
 
-    viskores::filter::uncertainty::VFDivergenceAnalytical redSea_analyticalFilter;
-    redSea_analyticalFilter.SetIsovalue(0);
-    viskores::cont::DataSet redSea_analyticalResult = redSea_analyticalFilter.Execute(redSea_ds);
+    /*
+    const int numRuns = 1;
+    std::vector<double> analyticalTimes;
+    std::vector<double> samplingTimes;
 
-    auto redSea_endAnalytical = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> redSea_analyticalDuration = redSea_endAnalytical - redSea_startAnalytical;
-    std::cout << "(uncertainVectorFieldRedSea.vtk) Analytical Approach Computation Time: " << redSea_analyticalDuration.count() << " seconds" << std::endl;
+    std::cout << "Benchmarking: Running Analytical Approach " << numRuns << " Times..." << std::endl;
+    for (int i = 0; i < numRuns; ++i) {
+        auto startAnalytical = std::chrono::high_resolution_clock::now();
 
-    viskores::io::VTKDataSetWriter redSea_analyticalWriter("out_uncertainVectorFieldRedSea_analytical.vtk");
-    redSea_analyticalWriter.WriteDataSet(redSea_analyticalResult);
+        viskores::filter::uncertainty::VFDivergenceAnalytical analyticalFilter;
+        analyticalFilter.SetIsovalue(0.003);
+        analyticalFilter.Execute(ds);
 
-    auto redSea_startSampling = std::chrono::high_resolution_clock::now();
+        auto endAnalytical = std::chrono::high_resolution_clock::now();
+        analyticalTimes.push_back(std::chrono::duration<double>(endAnalytical - startAnalytical).count());
+    }
 
-    viskores::filter::uncertainty::sampling::VFDivergenceSampling redSea_samplingFilter;
-    redSea_samplingFilter.SetIsovalue(0.0);
-    viskores::cont::DataSet redSea_samplingResult = redSea_samplingFilter.Execute(redSea_ds);
+    std::cout << "Benchmarking: Running Sampling Approach " << numRuns << " Times..." << std::endl;
+    for (int i = 0; i < numRuns; ++i) {
+        auto startSampling = std::chrono::high_resolution_clock::now();
 
-    auto redSea_endSampling = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> redSea_samplingDuration = redSea_endSampling - redSea_startSampling;
-    std::cout << "(uncertainVectorFieldRedSea.vtk) Sampling Approach Computation Time: " << redSea_samplingDuration.count() << " seconds" << std::endl;
+        viskores::filter::uncertainty::sampling::VFDivergenceSampling samplingFilter;
+        samplingFilter.SetIsovalue(0.003);
+        samplingFilter.Execute(ds);
 
-    viskores::io::VTKDataSetWriter redSea_samplingWriter("out_uncertainVectorFieldRedSea_sampling.vtk");
-    redSea_samplingWriter.WriteDataSet(redSea_samplingResult);*/
+        auto endSampling = std::chrono::high_resolution_clock::now();
+        samplingTimes.push_back(std::chrono::duration<double>(endSampling - startSampling).count());
+    }
+
+    double analyticalSum = std::accumulate(analyticalTimes.begin(), analyticalTimes.end(), 0.0);
+    double samplingSum = std::accumulate(samplingTimes.begin(), samplingTimes.end(), 0.0);
+
+    std::cout << "\n------------------------------------------------------------" << std::endl;
+    std::cout << "Average Analytical Computation Time Over " << numRuns << " Runs: "
+              << analyticalSum / numRuns << " Seconds" << std::endl;
+    std::cout << "Average Sampling Computation Time Over " << numRuns << " Runs: "
+              << samplingSum / numRuns << " Seconds" << std::endl;
+    std::cout << "------------------------------------------------------------" << std::endl;
+    */
+
+    viskores::filter::uncertainty::VFDivergenceAnalytical analyticalFilter;
+    analyticalFilter.SetIsovalue(0.003);
+    viskores::cont::DataSet analyticalResult = analyticalFilter.Execute(ds);
+    viskores::io::VTKDataSetWriter analyticalWriter("out_uncertainRedSea2D_analytical.vtk");
+    analyticalWriter.WriteDataSet(analyticalResult);
+
+    viskores::filter::uncertainty::sampling::VFDivergenceSampling samplingFilter;
+    samplingFilter.SetIsovalue(0.003);
+    viskores::cont::DataSet samplingResult = samplingFilter.Execute(ds);
+    viskores::io::VTKDataSetWriter samplingWriter("out_uncertainRedSea2D_sampling.vtk");
+    samplingWriter.WriteDataSet(samplingResult);
 
     return 0;
 }
+
+// SERIAL
+// -- Timing Results for Analytical Approach on uncertainVectorField.vtk ---
+//    Number of runs: 100
+//    Average Time:   0.00574131 seconds
+//    Min Time:       0.00538146 seconds
+//    Max Time:       0.00636583 seconds
+//    Std. Deviation: 0.000181724 seconds
+// ----------------------------------------------------------- 
+// Timing Results for Sampling Approach on uncertainVectorField.vtk ---
+//    Number of runs: 100
+//    Average Time:   6.44922 seconds
+//    Min Time:       6.2985 seconds
+//    Max Time:       6.57621 seconds
+//    Std. Deviation: 0.0700428 seconds
+// --------------------------------------------------------
+
+// OPEN_MP
+//------------------------------------------------------------
+// Average Analytical Computation Time Over 100 Runs: 0.000915094 Seconds
+// Average Sampling Computation Time Over 100 Runs: 0.812346 seconds
+//------------------------------------------------------------
+
+// SERIAL
+//------------------------------------------------------------
+// Average Analytical Computation Time Over 1 Runs: 0.272161 Seconds
+// Average Sampling Computation Time Over 1 Runs: 333.758 Seconds
+//------------------------------------------------------------
+
+// OPEN_MP
+// ------------------------------------------------------------
+// Average Analytical Computation Time Over 1 Runs: 0.0301297 Seconds
+// Average Sampling Computation Time Over 1 Runs: 32.8752 Seconds
+//------------------------------------------------------------

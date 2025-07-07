@@ -29,8 +29,9 @@ project(Viskores_tut)
 #Find the Viskores package
 find_package(Viskores REQUIRED QUIET)
 
-#Find the Boost package
-find_package(Boost REQUIRED COMPONENTS random)
+if(Viskores_ENABLE_OPENMP)
+  find_package(OpenMP REQUIRED)
+endif()
 
 if (Viskores_ENABLE_TUTORIALS)
  # Viskores tutorial targets expect viskores libraries to be namespaced with the prefix viskores::.
@@ -60,6 +61,9 @@ target_link_libraries(vf_magnitude viskores::filter_core viskores::filter_vector
 
 add_executable(vf_divergence vf_divergence.cxx)
 target_link_libraries(vf_divergence PRIVATE viskores::filter_core viskores::filter_vector_analysis viskores::io)
+if(Viskores_ENABLE_OPENMP AND OpenMP_CXX_FOUND)
+  target_link_libraries(vf_divergence PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 add_executable(contour contour.cxx)
 target_link_libraries(contour viskores::filter_core viskores::filter_contour viskores::io)
