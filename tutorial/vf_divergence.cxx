@@ -37,7 +37,7 @@
 #include <random>
 #include <cmath>
 
-#include <omp.h>
+// #include <omp.h>
 
 // Forward Declaration for Analytical and Sampling Approaches
 namespace viskores
@@ -261,7 +261,7 @@ VFDivergenceAnalytical::DoExecute(const viskores::cont::DataSet& input)
 } // namespace viskores
 
 // Sampling Approach
-namespace viskores
+/*namespace viskores
 {
 namespace filter
 {
@@ -485,7 +485,7 @@ viskores::cont::DataSet VFDivergenceSampling::DoExecute(const viskores::cont::Da
 } // namespace uncertainty
 } // namespace filter
 } // namespace viskores
-
+*/
 
 /*int main(int argc, char* argv[])
 {
@@ -528,8 +528,7 @@ int main(int argc, char* argv[]) {
     viskores::io::VTKDataSetReader reader("data/uncertainRedSea2D.vtk");
     viskores::cont::DataSet ds = reader.ReadDataSet();
 
-    /*
-    const int numRuns = 1;
+    const int numRuns = 100;
     std::vector<double> analyticalTimes;
     std::vector<double> samplingTimes;
 
@@ -545,6 +544,7 @@ int main(int argc, char* argv[]) {
         analyticalTimes.push_back(std::chrono::duration<double>(endAnalytical - startAnalytical).count());
     }
 
+    /*
     std::cout << "Benchmarking: Running Sampling Approach " << numRuns << " Times..." << std::endl;
     for (int i = 0; i < numRuns; ++i) {
         auto startSampling = std::chrono::high_resolution_clock::now();
@@ -556,13 +556,15 @@ int main(int argc, char* argv[]) {
         auto endSampling = std::chrono::high_resolution_clock::now();
         samplingTimes.push_back(std::chrono::duration<double>(endSampling - startSampling).count());
     }
+    */
 
     double analyticalSum = std::accumulate(analyticalTimes.begin(), analyticalTimes.end(), 0.0);
-    double samplingSum = std::accumulate(samplingTimes.begin(), samplingTimes.end(), 0.0);
+    // double samplingSum = std::accumulate(samplingTimes.begin(), samplingTimes.end(), 0.0);
 
     std::cout << "\n------------------------------------------------------------" << std::endl;
     std::cout << "Average Analytical Computation Time Over " << numRuns << " Runs: "
               << analyticalSum / numRuns << " Seconds" << std::endl;
+    /*
     std::cout << "Average Sampling Computation Time Over " << numRuns << " Runs: "
               << samplingSum / numRuns << " Seconds" << std::endl;
     std::cout << "------------------------------------------------------------" << std::endl;
@@ -574,11 +576,13 @@ int main(int argc, char* argv[]) {
     viskores::io::VTKDataSetWriter analyticalWriter("out_uncertainRedSea2D_analytical.vtk");
     analyticalWriter.WriteDataSet(analyticalResult);
 
+    /*
     viskores::filter::uncertainty::sampling::VFDivergenceSampling samplingFilter;
     samplingFilter.SetIsovalue(0.003);
     viskores::cont::DataSet samplingResult = samplingFilter.Execute(ds);
     viskores::io::VTKDataSetWriter samplingWriter("out_uncertainRedSea2D_sampling.vtk");
     samplingWriter.WriteDataSet(samplingResult);
+    */
 
     return 0;
 }
