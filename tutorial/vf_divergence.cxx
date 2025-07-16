@@ -569,7 +569,6 @@ int main(int argc, char* argv[])
 
         std::cout << " Time: " << samplingTime << " seconds." << std::endl;
 
-        // Create a unique filename for each run
         std::string output_filename = "result_data/red_sea/out_uncertainRedSea2D_" + std::to_string(samples) + ".vtk";
         
         try
